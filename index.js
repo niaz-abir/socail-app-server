@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const port = process.env.PORT;
 const cors = require("cors");
-const { json, response } = require("express");
+const { json, response, query } = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
@@ -23,6 +23,7 @@ app.get("/", (req, res) => {
 
 const run = async () => {
   const postsCollection = client.db("socialMediaAppDB").collection("posts");
+  const usercollection = client.db("socialMediaAppDB").collection("users");
 
   app.post("/posts/new", async (req, res) => {
     const response = await postsCollection.insertOne(req.body);
@@ -34,6 +35,17 @@ const run = async () => {
     const sortedResult = result.sort((a, b) => b.love - a.love);
     console.log(sortedResult);
     res.send(sortedResult);
+  });
+  app.post("/users/new", async (req, res) => {
+    const result = await usercollection.insertOne(req.body);
+    res.send(result);
+  });
+
+  app.get("/users", async (req, res) => {
+    const email = req.query.email;
+    console.log(req.query);
+    const result = await usercollection.findOne({ email: email });
+    res.send(result);
   });
 
   app.get("/detail/:id", async (req, res) => {
